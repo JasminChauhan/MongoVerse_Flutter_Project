@@ -6,7 +6,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 # COPY ["MongoVerse.csproj", "./"]
 COPY Backend/MongoVerse.csproj ./Backend
-WORKDIR /src/Backend
+WORKDIR /Backend
 RUN dotnet restore "./MongoVerse.csproj"
 COPY . .
 RUN dotnet build "./MongoVerse.csproj" -c Release -o /app/build
@@ -18,6 +18,7 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "MongoVerse.dll"]
+
 
 
 
