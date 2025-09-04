@@ -3,7 +3,7 @@ WORKDIR /app
 EXPOSE 8080
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /src
+WORKDIR /src/Backend
 COPY ["MongoVerse.csproj", "./"]
 RUN dotnet restore "./MongoVerse.csproj"
 COPY . .
@@ -16,4 +16,5 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "MongoVerse.dll"]
+
 
