@@ -36,4 +36,5 @@ WORKDIR /app
 COPY --from=build /app ./
 
 ENV ASPNETCORE_URLS=http://+:$PORT
-ENTRYPOINT ["dotnet","MongoVerse.csproj"]
+ENTRYPOINT ["dotnet","MongoVerse.dll"]
+
