@@ -1,0 +1,6 @@
+@MongoVerse_HostAddress = http://localhost:5037
+
+GET {{MongoVerse_HostAddress}}/MV_Modules
+Accept: application/json
+
+###
