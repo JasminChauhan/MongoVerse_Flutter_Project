@@ -27,7 +27,8 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
 
 # Copy csproj and restore
-COPY ./MongoVerse.csproj ./
+COPY MongoVerse.csproj ./
+RUN if [ ! -f MongoVerse.csproj ]; then echo "MongoVerse.csproj not found" && exit 1; fi
 RUN dotnet restore
 
 # Copy everything else
@@ -49,9 +50,3 @@ EXPOSE ${PORT}
 
 # Entry point
 ENTRYPOINT ["dotnet", "MongoVerse.dll"]
-
-
-
-
-
-
