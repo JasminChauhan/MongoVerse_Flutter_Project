@@ -19,16 +19,26 @@
 # COPY --from=publish /app/publish .
 # ENTRYPOINT ["dotnet", "MongoVerse.dll"]
 
-# Start with the SDK image
+# Build stage
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /app
-COPY . .
+WORKDIR /src
+
+# Copy only relevant project files first for caching restore
+COPY MongoVerse.csproj ./
+
 RUN dotnet restore "MongoVerse.csproj"
-RUN dotnet build "MongoVerse.csproj" -c Release -o /app/build
+
+# Copy the rest of the source files
+COPY . ./
+
+# Build and publish
 RUN dotnet publish "MongoVerse.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
-# Use the runtime image
+# Final stage: runtime
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
+
 COPY --from=build /app/publish .
+
+EXPOSE 8080
 ENTRYPOINT ["dotnet", "MongoVerse.dll"]
