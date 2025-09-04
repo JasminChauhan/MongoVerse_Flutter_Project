@@ -7,17 +7,18 @@ WORKDIR /src
 # COPY ["MongoVerse.csproj", "./"]
 COPY Backend/MongoVerse.csproj ./Backend
 WORKDIR /Backend
-RUN dotnet restore "./MongoVerse.csproj"
+RUN dotnet restore "MongoVerse.csproj"
 COPY . .
-RUN dotnet build "./MongoVerse.csproj" -c Release -o /app/build
+RUN dotnet build "MongoVerse.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "./MongoVerse.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "MongoVerse.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "MongoVerse.dll"]
+
 
 
 
