@@ -1,3 +1,4 @@
+using Npgsql;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -11,6 +12,12 @@ builder.Services.AddCors(options => {
         builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()
         );
 });
+
+var connectionString = builder.Configuration.GetConnectionString("postgresql");
+if (string.IsNullOrEmpty(connectionString))
+{
+    throw new InvalidOperationException("Connection string 'MongoVerse' not found.");
+}
 
 var app = builder.Build();
 
@@ -29,3 +36,4 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
