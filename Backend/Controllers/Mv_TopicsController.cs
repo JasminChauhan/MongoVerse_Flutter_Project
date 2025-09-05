@@ -280,7 +280,7 @@ namespace MongoVerse.Controllers
             try
             {
                 List<MV_Topics> listTopics = new List<MV_Topics>();
-                using (NpgsqlConnection connection = new NpgsqlConnection(_configuration.GetConnectionString("MongoVerse")))
+                using (NpgsqlConnection connection = new NpgsqlConnection(_configuration.GetConnectionString("postgresql")))
                 {
                     connection.Open();
                     using (NpgsqlCommand command = new NpgsqlCommand("SELECT topic_id, topic_title, topic_content, module_id, topic_description FROM mv_topics WHERE module_id = @ModuleId", connection))
@@ -324,3 +324,4 @@ namespace MongoVerse.Controllers
         }
     }
 }
+
