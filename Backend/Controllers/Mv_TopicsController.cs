@@ -1,4 +1,4 @@
-﻿//using Microsoft.AspNetCore.Http;
+//using Microsoft.AspNetCore.Http;
 //using Microsoft.AspNetCore.Identity;
 //using Microsoft.AspNetCore.Mvc;
 //using Microsoft.Data.SqlClient;
@@ -68,9 +68,146 @@
 //}
 
 
+//
+//
+//
+//
+//
+
+
+//using Microsoft.AspNetCore.Http;
+//using Microsoft.AspNetCore.Mvc;
+//using Microsoft.Data.SqlClient;
+//using MongoVerse.Models;
+//using System;
+//using System.Collections.Generic;
+
+//namespace MongoVerse.Controllers
+//{
+//    [Route("api/[controller]")]
+//    [ApiController]
+//    public class MV_TopicsController : ControllerBase
+//    {
+//        private readonly IConfiguration _configuration;
+
+//        public MV_TopicsController(IConfiguration configuration)
+//        {
+//            _configuration = configuration;
+//        }
+
+//        // GET: api/MV_Topics
+//        [HttpGet]
+//        public IActionResult GetAllTopics()
+//        {
+//            try
+//            {
+//                List<MV_Topics> listTopics = new List<MV_Topics>();
+//                using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("MongoVerse")))
+//                {
+//                    connection.Open();
+//                    SqlCommand command = new SqlCommand("PR_MV_Topics_SelectAll", connection)
+//                    {
+//                        CommandType = System.Data.CommandType.StoredProcedure
+//                    };
+
+//                    using (SqlDataReader reader = command.ExecuteReader())
+//                    {
+//                        while (reader.Read())
+//                        {
+//                            MV_Topics topic = new MV_Topics
+//                            {
+//                                Topic_Id = Convert.ToInt32(reader["Topic_Id"]),
+//                                Topic_Title = reader["Topic_Title"].ToString(),
+//                                Topic_Content = reader["Topic_Content"].ToString(),
+//                                Module_Id = Convert.ToInt32(reader["Module_Id"]),
+//                                Topic_Description = reader["Topic_Description"].ToString()
+//                            };
+//                            listTopics.Add(topic);
+//                        }
+//                    }
+//                }
+
+//                var response = new Dictionary<string, object>
+//                {
+//                    { "IsResponse", true },
+//                    { "HasRecords", listTopics.Count > 0 },
+//                    { "Data", listTopics.Count > 0 ? listTopics : null }
+//                };
+
+//                return Ok(response);
+//            }
+//            catch (Exception ex)
+//            {
+//                return BadRequest(new
+//                {
+//                    Message = ex.Message,
+//                    InnerException = ex.InnerException?.Message
+//                });
+//            }
+//        }
+
+
+//        [HttpGet("/api/[controller]/{moduleId}")]
+//        public IActionResult GetTopicsByModuleId(int moduleId)
+//        {
+//            try
+//            {
+//                List<MV_Topics> listTopics = new List<MV_Topics>();
+//                using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("MongoVerse")))
+//                {
+//                    connection.Open();
+//                    SqlCommand command = new SqlCommand("PR_MV_Topics_SelectByModuleId", connection)
+//                    {
+//                        CommandType = System.Data.CommandType.StoredProcedure
+//                    };
+//                    command.Parameters.AddWithValue("@ModuleId", moduleId);
+
+//                    using (SqlDataReader reader = command.ExecuteReader())
+//                    {
+//                        while (reader.Read())
+//                        {
+//                            MV_Topics topic = new MV_Topics
+//                            {
+//                                Topic_Id = Convert.ToInt32(reader["Topic_Id"]),
+//                                Topic_Title = reader["Topic_Title"].ToString(),
+//                                Topic_Content = reader["Topic_Content"].ToString(),
+//                                Module_Id = Convert.ToInt32(reader["Module_Id"]),
+//                                Topic_Description = reader["Topic_Description"].ToString()
+//                            };
+//                            listTopics.Add(topic);
+//                        }
+//                    }
+//                }
+
+//                var response = new Dictionary<string, object>
+//                {
+//                    { "IsResponse", true },
+//                    { "HasRecords", listTopics.Count > 0 },
+//                    { "Data", listTopics.Count > 0 ? listTopics : null }
+//                };
+
+//                return Ok(response);
+//            }
+//            catch (Exception ex)
+//            {
+//                return BadRequest(new
+//                {
+//                    Message = ex.Message,
+//                    InnerException = ex.InnerException?.Message
+//                });
+//            }
+//        }
+//    }
+//}
+
+//
+//
+//
+//
+
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
+using Npgsql;
 using MongoVerse.Models;
 using System;
 using System.Collections.Generic;
@@ -95,27 +232,25 @@ namespace MongoVerse.Controllers
             try
             {
                 List<MV_Topics> listTopics = new List<MV_Topics>();
-                using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("MongoVerse")))
+                using (NpgsqlConnection connection = new NpgsqlConnection(_configuration.GetConnectionString("postgresql")))
                 {
                     connection.Open();
-                    SqlCommand command = new SqlCommand("PR_MV_Topics_SelectAll", connection)
+                    using (NpgsqlCommand command = new NpgsqlCommand("SELECT topic_id, topic_title, topic_content, module_id, topic_description FROM mv_topics", connection))
                     {
-                        CommandType = System.Data.CommandType.StoredProcedure
-                    };
-
-                    using (SqlDataReader reader = command.ExecuteReader())
-                    {
-                        while (reader.Read())
+                        using (NpgsqlDataReader reader = command.ExecuteReader())
                         {
-                            MV_Topics topic = new MV_Topics
+                            while (reader.Read())
                             {
-                                Topic_Id = Convert.ToInt32(reader["Topic_Id"]),
-                                Topic_Title = reader["Topic_Title"].ToString(),
-                                Topic_Content = reader["Topic_Content"].ToString(),
-                                Module_Id = Convert.ToInt32(reader["Module_Id"]),
-                                Topic_Description = reader["Topic_Description"].ToString()
-                            };
-                            listTopics.Add(topic);
+                                MV_Topics topic = new MV_Topics
+                                {
+                                    Topic_Id = reader.GetInt32(0),
+                                    Topic_Title = reader.GetString(1),
+                                    Topic_Content = reader.GetString(2),
+                                    Module_Id = reader.GetInt32(3),
+                                    Topic_Description = reader.GetString(4)
+                                };
+                                listTopics.Add(topic);
+                            }
                         }
                     }
                 }
@@ -139,35 +274,32 @@ namespace MongoVerse.Controllers
             }
         }
 
-        
         [HttpGet("/api/[controller]/{moduleId}")]
         public IActionResult GetTopicsByModuleId(int moduleId)
         {
             try
             {
                 List<MV_Topics> listTopics = new List<MV_Topics>();
-                using (SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("MongoVerse")))
+                using (NpgsqlConnection connection = new NpgsqlConnection(_configuration.GetConnectionString("MongoVerse")))
                 {
                     connection.Open();
-                    SqlCommand command = new SqlCommand("PR_MV_Topics_SelectByModuleId", connection)
+                    using (NpgsqlCommand command = new NpgsqlCommand("SELECT topic_id, topic_title, topic_content, module_id, topic_description FROM mv_topics WHERE module_id = @ModuleId", connection))
                     {
-                        CommandType = System.Data.CommandType.StoredProcedure
-                    };
-                    command.Parameters.AddWithValue("@ModuleId", moduleId);
-
-                    using (SqlDataReader reader = command.ExecuteReader())
-                    {
-                        while (reader.Read())
+                        command.Parameters.AddWithValue("ModuleId", moduleId);
+                        using (NpgsqlDataReader reader = command.ExecuteReader())
                         {
-                            MV_Topics topic = new MV_Topics
+                            while (reader.Read())
                             {
-                                Topic_Id = Convert.ToInt32(reader["Topic_Id"]),
-                                Topic_Title = reader["Topic_Title"].ToString(),
-                                Topic_Content = reader["Topic_Content"].ToString(),
-                                Module_Id = Convert.ToInt32(reader["Module_Id"]),
-                                Topic_Description = reader["Topic_Description"].ToString()
-                            };
-                            listTopics.Add(topic);
+                                MV_Topics topic = new MV_Topics
+                                {
+                                    Topic_Id = reader.GetInt32(0),
+                                    Topic_Title = reader.GetString(1),
+                                    Topic_Content = reader.GetString(2),
+                                    Module_Id = reader.GetInt32(3),
+                                    Topic_Description = reader.GetString(4)
+                                };
+                                listTopics.Add(topic);
+                            }
                         }
                     }
                 }
